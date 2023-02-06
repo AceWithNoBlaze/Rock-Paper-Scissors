@@ -1,0 +1,22 @@
+body {
+    margin: auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh; /* body height at it's maximum*/
+    font-size: 20px;
+    color: white;
+    background-color: black;
+}
+.container {
+    display: flex;
+    flex-direction: column;
+    gap: 50px;
+    text-align: center;
+}
+
+button {
+    height: 100px;
+    width: 200px;
+}
+

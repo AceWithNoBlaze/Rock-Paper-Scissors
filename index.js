@@ -3,47 +3,43 @@ let thePlayerChoice;
 const choices = ["rock", "paper", "scissor"]; //array length is 3
 let pointComputer = 0;
 let pointPlayer = 0;
-let playRound = 0;
-let roundLength = 0;
+let roundLength = 1;
+// DOM edits
+//global variables
+let promptLetter = document.querySelector("div.text");
+let player = document.querySelector("p#player");
+let computer = document.querySelector("p#pc");
+let round = document.querySelector("div#round");
 
-function getComputerChoice() {
-  if (
-    thePlayerChoice == choices[0] ||
-    thePlayerChoice == choices[1] ||
-    thePlayerChoice == choices[2]
-  ) {
-    theComputerChoice = Math.random(); // makes a random decimal between 0.01-0.99
-    theComputerChoice *= choices.length; // let the random decimal be between 0.01-3.99
-    theComputerChoice = Math.floor(theComputerChoice); // turns the decimal into an integer between the respected arrays length Choices
-    console.log(`pc: ${choices[theComputerChoice]}`);
+function typeLetter(e, callback) {
+  let textArray = e.split("");
+  let sentence = "";
+  for (let i = 0; i < textArray.length; i++) {
+    setTimeout(() => {
+      sentence += textArray[i];
+      promptLetter.textContent = sentence;
+      if (i == textArray.length-1) {
+        callback();
+      };
+    }, i * 100); // if I don't do * i, it will all come after 100 seconds. this indicates that there is a loop
+  }
+} // it shows letter per letter
+
+function getPlayerChoice(e) {
+  let thePlayerChoice = e.target.textContent;
+  promptLetter.textContent = typeLetter(thePlayerChoice, () => {});
+  console.log(thePlayerChoice);
+  return thePlayerChoice; // Add this line
+ } // allows the player to choose
+
+ function getComputerChoice() {
+    theComputerChoice = Math.floor(Math.random() * choices.length); 
+    //This combines the calculation of a random decimal, scaling it based on the length of the choices array, and rounding it down to an integer into a single line of code.
+    console.log(choices[theComputerChoice]);
     return choices[theComputerChoice];
-  } else {
-    return;
-  }
-}
+ } // allows the computer to choose
 
-function getPlayerChoice() {
-  thePlayerChoice = prompt("Choose between rock, paper or scissors: ");
-
-  if (!!thePlayerChoice == true) {
-    thePlayerChoice = thePlayerChoice.toLowerCase(); // make it lowercase so that it's equal to my arrays values
-    console.log(`You: ${thePlayerChoice}`);
-    if (
-      thePlayerChoice == choices[0] ||
-      thePlayerChoice == choices[1] ||
-      thePlayerChoice == choices[2]
-    ) {
-      alert("1 2 3...");
-      return thePlayerChoice;
-    } else {
-      return console.log("You're doing it wrong!");
-    }
-  } else {
-    return console.log("You left us, why aren't you trying?");
-  }
-}
-
-function oneRound(playerSelection, computerSelection) {
+ function playRound(playerSelection, computerSelection, callback) {
   const A = computerSelection == "rock" && playerSelection == "scissor"; //Lose
   const B = computerSelection == "rock" && playerSelection == "paper"; //Win
   const C = computerSelection == "rock" && playerSelection == "rock"; //Draw
@@ -53,48 +49,73 @@ function oneRound(playerSelection, computerSelection) {
   const H = computerSelection == "scissor" && playerSelection == "rock"; //Win
   const I = computerSelection == "scissor" && playerSelection == "paper"; //Lose
   const J = computerSelection == "scissor" && playerSelection == "scissor"; //Draw
+
   if (A || F || I) {
-    console.log(`You Lose! ${computerSelection} beats ${playerSelection}`);
+    typeLetter(`You Lose! ${computerSelection} beats ${playerSelection}`, callback);
     pointComputer++;
-  } else if (B || D || H) {
-    console.log(`You Win! ${playerSelection} beats ${computerSelection}`);
-    pointPlayer++;
-  } else if (C || G || J) {
-    console.log("It was a draw try again.");
-    oneRound(getPlayerChoice(), getComputerChoice());
-  } else {
-    console.warn("Don't let the next time be a waste of time...");
-  }
-}
-
-
-while (roundLength < 5) {
-  console.log(`round ${roundLength + 1}`);
-  oneRound(getPlayerChoice(), getComputerChoice());
-
-  if (
-    thePlayerChoice == choices[0] ||
-    thePlayerChoice == choices[1] ||
-    thePlayerChoice == choices[2]
-  ) {
-    playRound = ++playRound;
     roundLength++;
-  }
+    computer.textContent = `computer = ${pointComputer}`;
+    round.textContent = `Round ${roundLength} `;
+  } else if (B || D || H) {
+    typeLetter(`You Win! ${playerSelection} beats ${computerSelection}`, callback);
+    pointPlayer++;
+    roundLength++;
+    player.textContent = `player = ${pointPlayer}`;
+    round.textContent = `Round ${roundLength} `;
+  } else if (C || G || J) {
+    typeLetter("It was a draw try again.", callback);
+    playRound(getPlayerChoice, getComputerChoice, callback);
+  } 
+} // the round goes until roundLength reaches 5
 
-  if (!thePlayerChoice == true) {
-    break;
-  }
+function game() {
+  Determination = confirm("Are you prepared to sit and fight?")
+  
+  if (!Determination == true) return;
+  typeLetter("Choose between rock, paper or scissor: ", () => {
+    // Local variables
+    let rock = document.querySelector("button#rock");
+    let paper = document.querySelector("button#paper");
+    let scissor = document.querySelector("button#scissor");
+    let buttons = document.querySelectorAll("button");
+    // properties
+    rock.textContent = "rock";
+    paper.textContent = "paper";
+    scissor.textContent = "scissor";
 
-  console.log(`${pointPlayer}:${pointComputer}`);
-  if (pointPlayer == 3 || pointComputer == 3) {
-    break;
-  }
-}
+    buttons.forEach(button => button.addEventListener("click", (e) => {
+      buttons.forEach(button => button.disabled=true);
+      playRound(getPlayerChoice(e), getComputerChoice(), () => {
+        if (button.disabled == true & !(pointPlayer==5) & !(pointComputer==5)){
+          playRound;
+          buttons.forEach(button => button.disabled=false);
+        }
 
-if (playRound >= 4) {
-  if (pointPlayer > pointComputer) {
-    console.log("you've won!");
-  } else {
-    console.log("you've lost!");
-  }
-}
+        if (pointComputer==5){
+          setTimeout(typeLetter("you've tried, but yet that's not enough...", () => {setTimeout(
+          typeLetter("Refresh or ctrl+r to start again", () => {}),2000) 
+          }), 2000)
+        }
+
+        if(pointPlayer==5){
+          setTimeout(typeLetter("you've made it...", () => {setTimeout(
+          typeLetter("Refresh or ctrl+r to start again", () => {}), 2000)
+          }),2000)
+        }
+      });
+    }))
+  });
+} // the game itself
+
+
+game()
+
+
+console.log("you've completed")
+
+
+
+
+
+ 
+
